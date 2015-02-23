@@ -1,0 +1,82 @@
+<style>
+  input { display: block }
+  textarea { width: 100%; margin: 5px 0 }
+  ul { list-style: none; padding: 0 }
+  li { padding: 20px 0 }
+  li { border-bottom: 1px solid #e5e5e5 }
+  div.message { padding-left: 20px; white-space: pre; }
+</style>
+<div class="container">
+<div class="header">
+  <input id="username" value="Guest">
+  <textarea id="chatbox"></textarea>
+</div>
+
+<ul id="messages">
+  <%= for message <- @messages do %>
+    <li><label class="user"><%= message_user message %></label><div class="message"><%= message_body message %></div></li>
+  <% end %>
+</ul>
+
+</div>
+
+<script src="/js/phoenix.js" type="text/javascript"></script>
+<script>
+var socket = new Phoenix.Socket("ws://" + location.host +  "/ws");
+var chatbox = document.getElementById("chatbox");
+var username = document.getElementById("username");
+var messages = document.getElementById("messages");
+var new_textarea;
+
+function getUsername() {
+  var ln = localStorage.getItem("username");
+  if (ln) { return ln }
+  else { return username.value.trim() }
+}
+
+username.value = getUsername();
+
+username.onchange = function(e) {
+  var ln = username.value.trim();
+  if (ln) {}
+  else {
+    ln = "Guest";
+  }
+  username.value = ln;
+  localStorage.setItem("username", ln);
+}
+
+socket.join("rooms:lobby", {}, function(chan) {
+  chatbox.focus();
+  window.onkeydown = function(e) {
+    if (e.target === chatbox && e.keyCode === 13 && e.shiftKey === false) {
+      e.preventDefault();
+      chan.send("new:msg", {user: username.value, body: chatbox.value});
+      chatbox.value = "";
+    }
+  }
+
+  chan.on("new:msg", function(message){
+    new_textarea = document.createElement("div");
+    new_textarea.className = "message";
+    render_message(new_textarea, message);
+  });
+});
+
+function render_message(textarea, message) {
+  var li = document.createElement("li");
+  var label = document.createElement("label");
+
+  label.innerText = message.user
+    textarea.innerText = message.body;
+
+  li.appendChild(label);
+  li.appendChild(textarea);
+
+  messages.insertBefore(li, messages.firstChild);
+}
+
+Array.prototype.forEach.call(document.getElementsByClassName("message"), function(element) {
+  element.innerHTML = element.innerHTML.replace(/\n/g, '<br>');
+});
+</script>
