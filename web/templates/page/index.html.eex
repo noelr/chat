@@ -26,7 +26,6 @@ var socket = new Phoenix.Socket("ws://" + location.host +  "/ws");
 var chatbox = document.getElementById("chatbox");
 var username = document.getElementById("username");
 var messages = document.getElementById("messages");
-var new_textarea;
 
 function getUsername() {
   var ln = localStorage.getItem("username");
@@ -57,26 +56,22 @@ socket.join("rooms:lobby", {}, function(chan) {
   }
 
   chan.on("new:msg", function(message){
-    new_textarea = document.createElement("div");
-    new_textarea.className = "message";
-    render_message(new_textarea, message);
+    render_message(message);
   });
 });
 
-function render_message(textarea, message) {
+function render_message(message) {
   var li = document.createElement("li");
   var label = document.createElement("label");
+  var textarea = document.createElement("div");
+  textarea.className = "message";
 
-  label.innerText = message.user
-    textarea.innerText = message.body;
+  label.textContent = message.user;
+  textarea.textContent = message.body;
 
   li.appendChild(label);
   li.appendChild(textarea);
 
   messages.insertBefore(li, messages.firstChild);
 }
-
-Array.prototype.forEach.call(document.getElementsByClassName("message"), function(element) {
-  element.innerHTML = element.innerHTML.replace(/\n/g, '<br>');
-});
 </script>
