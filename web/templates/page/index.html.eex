@@ -28,7 +28,7 @@ var username = document.getElementById("username");
 var messages = document.getElementById("messages");
 
 function getUsername() {
-  var ln = localStorage.getItem("username");
+  var ln = sessionStorage.getItem("username");
   if (ln) { return ln }
   else { return username.value.trim() }
 }
@@ -42,7 +42,7 @@ username.onchange = function(e) {
     ln = "Guest";
   }
   username.value = ln;
-  localStorage.setItem("username", ln);
+  sessionStorage.setItem("username", ln);
 }
 
 socket.join("rooms:lobby", {}, function(chan) {
