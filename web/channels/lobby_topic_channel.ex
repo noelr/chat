@@ -3,12 +3,8 @@ defmodule Chat.LobbyTopicChannel do
 
   def join("rooms:lobby", message, socket) do
     reply socket, "join", %{status: "connected"}
-    broadcast socket, "user:entered", %{user: message["user"]}
+    broadcast! socket, "user:entered", %{user: message["user"]}
     {:ok, socket}
-  end
-
-  def join("rooms:" <> _private_subtopic, _message, socket) do
-    {:error, socket, :unauthorized}
   end
 
   def leave(reason, socket) do
@@ -17,7 +13,7 @@ defmodule Chat.LobbyTopicChannel do
 
   def handle_in("new:msg", message, socket) do
     Chat.History.add(message["user"], message["body"])
-    broadcast socket, "new:msg", message
+    broadcast! socket, "new:msg", message
     {:ok, socket}
   end
 
